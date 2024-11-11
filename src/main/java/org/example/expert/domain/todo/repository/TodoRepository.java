@@ -52,6 +52,4 @@ public interface TodoRepository extends JpaRepository<Todo, Long>, TodoDslReposi
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable);
-
-
 }
