@@ -1,4 +1,4 @@
-package org.example.expert.client.dto;
+package org.example.expert.api.dto;
 
 import lombok.Getter;
 
