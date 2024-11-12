@@ -1,6 +1,7 @@
 package org.example.expert.domain.todo.repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.todo.dto.request.TodoSearchRequest;
@@ -8,6 +9,10 @@ import org.example.expert.domain.todo.dto.response.TodoDetailResponse;
 import org.example.expert.domain.todo.entity.QTodo;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.user.entity.QUser;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,22 +37,24 @@ public class TodoDslRepositoryImpl implements TodoDslRepository {
     }
 
     @Override
-    public List<TodoDetailResponse> findAllOrderByCreatedAtDesc(TodoSearchRequest requestDto) {
+    public Page<TodoDetailResponse> findAllOrderByCreatedAtDesc(TodoSearchRequest requestDto, Pageable pageable) {
         QTodo todo = QTodo.todo;
         QUser user = QUser.user;
-        List<Todo> todos = queryFactory.selectFrom(todo)
-                .leftJoin(todo.user, user).fetchJoin()
-                .where(makeWhere(requestDto))
-                .orderBy()
-                .limit(makeLimit(requestDto))
-                .offset(requestDto.getSize())
-                .orderBy(todo.createdAt.desc())
-                .fetch();
-        return todos.stream().map(TodoDetailResponse::from).toList();
-    }
 
-    private long makeLimit(TodoSearchRequest requestDto) {
-        return (long) requestDto.getSize() * requestDto.getPage();
+        JPAQuery<Long> cntTotal = queryFactory.select(todo.count()).from(todo)
+                .leftJoin(todo.user, user)
+                .where(makeWhere(requestDto));
+        List<TodoDetailResponse> todos = queryFactory.selectFrom(todo)
+                .leftJoin(todo.user, user)
+                .where(makeWhere(requestDto))
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
+                .orderBy(todo.createdAt.desc())
+                .fetch()
+                .stream()
+                .map(TodoDetailResponse::from)
+                .toList();
+        return PageableExecutionUtils.getPage(todos, pageable, cntTotal::fetchOne);
     }
 
     private BooleanBuilder makeWhere(TodoSearchRequest requestDto) {
@@ -55,18 +62,18 @@ public class TodoDslRepositoryImpl implements TodoDslRepository {
         QUser user = QUser.user;
         QTodo todo = QTodo.todo;
 
-        if (!requestDto.getTitle().isEmpty())
+        if (StringUtils.hasText(requestDto.getTitle()))
             builder.and(todo.title.contains(requestDto.getTitle()));
 
-        if (!requestDto.getNickname().isEmpty())
+        if (StringUtils.hasText(requestDto.getNickname()))
             builder.and(user.nickname.contains(requestDto.getNickname()));
 
-        if (!requestDto.getWeather().isEmpty())
+        if (StringUtils.hasText(requestDto.getWeather()))
             builder.and(todo.weather.contains(requestDto.getWeather()));
 
         if (requestDto.getStartCreateDate() != null && requestDto.getEndCreateDate() != null) {
-            builder.and(todo.createdAt.loe(requestDto.getStartCreateDate()))
-                    .and(todo.createdAt.goe(requestDto.getEndCreateDate()));
+            builder.and(todo.createdAt.goe(requestDto.getStartCreateDate()))
+                    .and(todo.createdAt.loe(requestDto.getEndCreateDate()));
         }
 
         return builder;

@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,7 +46,7 @@ public class TodoController {
     }
 
     @GetMapping("/querydsl/todos")
-    public ResponseEntity<List<TodoDetailResponse>> getQueryDslTodos(@RequestBody TodoSearchRequest requestDto) {
+    public ResponseEntity<Page<TodoDetailResponse>> getQueryDslTodos(@RequestBody TodoSearchRequest requestDto) {
         return ResponseEntity.ok(todoService.getQueryDslTodos(requestDto));
     }
 }

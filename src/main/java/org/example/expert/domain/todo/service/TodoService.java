@@ -20,8 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -63,8 +61,9 @@ public class TodoService {
         ));
     }
 
-    public List<TodoDetailResponse> getQueryDslTodos(TodoSearchRequest requestDto) {
-        return todoRepository.findAllOrderByCreatedAtDesc(requestDto);
+    public Page<TodoDetailResponse> getQueryDslTodos(TodoSearchRequest requestDto) {
+        Pageable pageable = PageRequest.of(requestDto.getPage() - 1, requestDto.getSize());
+        return todoRepository.findAllOrderByCreatedAtDesc(requestDto, pageable);
     }
 
     public TodoResponse getTodo(long todoId) {
