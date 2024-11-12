@@ -4,6 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.todo.dto.request.TodoSearchRequest;
+import org.example.expert.domain.todo.dto.response.TodoDetailResponse;
 import org.example.expert.domain.todo.entity.QTodo;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.user.entity.QUser;
@@ -31,10 +32,10 @@ public class TodoDslRepositoryImpl implements TodoDslRepository {
     }
 
     @Override
-    public List<Todo> findAllOrderByCreatedAtDesc(TodoSearchRequest requestDto) {
+    public List<TodoDetailResponse> findAllOrderByCreatedAtDesc(TodoSearchRequest requestDto) {
         QTodo todo = QTodo.todo;
         QUser user = QUser.user;
-        return queryFactory.selectFrom(todo)
+        List<Todo> todos = queryFactory.selectFrom(todo)
                 .leftJoin(todo.user, user).fetchJoin()
                 .where(makeWhere(requestDto))
                 .orderBy()
@@ -42,6 +43,7 @@ public class TodoDslRepositoryImpl implements TodoDslRepository {
                 .offset(requestDto.getSize())
                 .orderBy(todo.createdAt.desc())
                 .fetch();
+        return todos.stream().map(TodoDetailResponse::from).toList();
     }
 
     private long makeLimit(TodoSearchRequest requestDto) {

@@ -1,42 +1,34 @@
 package org.example.expert.domain.todo.dto.response;
 
-import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
+import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.user.dto.response.UserResponse;
 
 import java.time.LocalDateTime;
 
 @Getter
 public class TodoDetailResponse {
-    private final Long id;
-    private final String title;
-    private final String contents;
-    private final String weather;
-    private final UserResponse user;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime modifiedAt;
-    private final Long cntManager;
-    private final Long cntComment;
+    private Long id;
+    private String title;
+    private String contents;
+    private String weather;
+    private UserResponse user;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
+    private int cntManager;
+    private int cntComment;
 
-    @QueryProjection
-    public TodoDetailResponse(
-            Long id,
-            String title,
-            String contents,
-            String weather,
-            UserResponse user,
-            LocalDateTime createdAt,
-            LocalDateTime modifiedAt,
-            Long cntManager,
-            Long cntComment) {
-        this.id = id;
-        this.title = title;
-        this.contents = contents;
-        this.weather = weather;
-        this.user = user;
-        this.createdAt = createdAt;
-        this.modifiedAt = modifiedAt;
-        this.cntManager = cntManager;
-        this.cntComment = cntComment;
+    public static TodoDetailResponse from(Todo todo) {
+        TodoDetailResponse dto = new TodoDetailResponse();
+        dto.id = todo.getId();
+        dto.title = todo.getTitle();
+        dto.contents = todo.getContents();
+        dto.weather = todo.getWeather();
+        dto.user = UserResponse.from(todo.getUser());
+        dto.createdAt = todo.getCreatedAt();
+        dto.modifiedAt = todo.getModifiedAt();
+        dto.cntManager = todo.getManagers().size();
+        dto.cntComment = todo.getComments().size();
+        return dto;
     }
 }

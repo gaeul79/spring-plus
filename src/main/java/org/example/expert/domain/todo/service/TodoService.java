@@ -6,6 +6,7 @@ import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
 import org.example.expert.domain.todo.dto.request.TodoSearchRequest;
+import org.example.expert.domain.todo.dto.response.TodoDetailResponse;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
 import org.example.expert.domain.todo.entity.Todo;
@@ -19,13 +20,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class TodoService {
-
     private final TodoRepository todoRepository;
     private final WeatherClient weatherClient;
 
@@ -62,9 +63,8 @@ public class TodoService {
         ));
     }
 
-    public Page<TodoResponse> getQueryDslTodos(TodoSearchRequest requestDto) {
-        List<Todo> todos = todoRepository.findAllOrderByCreatedAtDesc(requestDto);
-        return null;
+    public List<TodoDetailResponse> getQueryDslTodos(TodoSearchRequest requestDto) {
+        return todoRepository.findAllOrderByCreatedAtDesc(requestDto);
     }
 
     public TodoResponse getTodo(long todoId) {

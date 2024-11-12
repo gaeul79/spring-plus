@@ -6,6 +6,7 @@ import org.example.expert.domain.common.annotation.Auth;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
 import org.example.expert.domain.todo.dto.request.TodoSearchRequest;
+import org.example.expert.domain.todo.dto.response.TodoDetailResponse;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
 import org.example.expert.domain.todo.service.TodoService;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,7 +47,7 @@ public class TodoController {
     }
 
     @GetMapping("/querydsl/todos")
-    public ResponseEntity<Page<TodoResponse>> getQueryDslTodos(@RequestBody TodoSearchRequest requestDto) {
+    public ResponseEntity<List<TodoDetailResponse>> getQueryDslTodos(@RequestBody TodoSearchRequest requestDto) {
         return ResponseEntity.ok(todoService.getQueryDslTodos(requestDto));
     }
 }
