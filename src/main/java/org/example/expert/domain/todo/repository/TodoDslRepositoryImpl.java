@@ -1,11 +1,14 @@
 package org.example.expert.domain.todo.repository;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.example.expert.domain.todo.dto.request.TodoSearchRequest;
 import org.example.expert.domain.todo.entity.QTodo;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.user.entity.QUser;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -25,5 +28,45 @@ public class TodoDslRepositoryImpl implements TodoDslRepository {
                         .where(todo.id.eq(todoId))
                         .fetchOne()
         );
+    }
+
+    @Override
+    public List<Todo> findAllOrderByCreatedAtDesc(TodoSearchRequest requestDto) {
+        QTodo todo = QTodo.todo;
+        QUser user = QUser.user;
+        return queryFactory.selectFrom(todo)
+                .leftJoin(todo.user, user).fetchJoin()
+                .where(makeWhere(requestDto))
+                .orderBy()
+                .limit(makeLimit(requestDto))
+                .offset(requestDto.getSize())
+                .orderBy(todo.createdAt.desc())
+                .fetch();
+    }
+
+    private long makeLimit(TodoSearchRequest requestDto) {
+        return (long) requestDto.getSize() * requestDto.getPage();
+    }
+
+    private BooleanBuilder makeWhere(TodoSearchRequest requestDto) {
+        BooleanBuilder builder = new BooleanBuilder();
+        QUser user = QUser.user;
+        QTodo todo = QTodo.todo;
+
+        if (!requestDto.getTitle().isEmpty())
+            builder.and(todo.title.contains(requestDto.getTitle()));
+
+        if (!requestDto.getNickname().isEmpty())
+            builder.and(user.nickname.contains(requestDto.getNickname()));
+
+        if (!requestDto.getWeather().isEmpty())
+            builder.and(todo.weather.contains(requestDto.getWeather()));
+
+        if (requestDto.getStartCreateDate() != null && requestDto.getEndCreateDate() != null) {
+            builder.and(todo.createdAt.loe(requestDto.getStartCreateDate()))
+                    .and(todo.createdAt.goe(requestDto.getEndCreateDate()));
+        }
+
+        return builder;
     }
 }
