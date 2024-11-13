@@ -1,7 +1,7 @@
 package org.example.expert.security;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.enums.UserRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,27 +11,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Getter
+@AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
-    private final User user;
-
-    public UserDetailsImpl(User user) {
-        this.user = user;
-    }
+    private Long id;
+    private String email;
+    private String nickname;
+    private String password;
+    private UserRole userRole;
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return user.getNickname();
+        return email;
     }
 
     // 권한 설정.. 접근 불가 페이지
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        UserRole role = user.getUserRole();
+        UserRole role = userRole;
         String authority = role.toString();
 
         SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(authority);

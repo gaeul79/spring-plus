@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.entity.Timestamped;
 import org.example.expert.domain.user.enums.UserRole;
+import org.example.expert.security.UserDetailsImpl;
 
 @Getter
 @Entity
@@ -42,12 +43,12 @@ public class User extends Timestamped {
         this.userRole = userRole;
     }
 
-    public static User fromAuthUser(AuthUser authUser) {
+    public static User fromAuthUser(UserDetailsImpl userDetail) {
         return new User(
-                authUser.getId(),
-                authUser.getEmail(),
-                authUser.getNickname(),
-                authUser.getUserRole());
+                userDetail.getId(),
+                userDetail.getEmail(),
+                userDetail.getNickname(),
+                userDetail.getUserRole());
     }
 
     public void changePassword(String password) {

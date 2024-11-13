@@ -9,6 +9,7 @@ import org.example.expert.domain.user.enums.UserRole;
 public class AuthUser {
     private final Long id;
     private final String email;
+    private final String password;
     private final String nickname;
     private final UserRole userRole;
 }

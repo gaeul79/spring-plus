@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @Component
 @RequiredArgsConstructor
 public class AdminAccessLoggingAspect {
-
     private final HttpServletRequest request;
 
     @Before("execution(* org.example.expert.domain.user.controller.UserAdminController.changeUserRole(..))")

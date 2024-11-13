@@ -1,13 +1,11 @@
 package org.example.expert.domain.manager.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.manager.dto.request.ManagerSaveRequest;
 import org.example.expert.domain.manager.dto.response.ManagerResponse;
 import org.example.expert.domain.manager.dto.response.ManagerSaveResponse;
 import org.example.expert.domain.manager.entity.Manager;
-import org.example.expert.domain.manager.entity.ManagerLog;
 import org.example.expert.domain.manager.repository.ManagerLogRepository;
 import org.example.expert.domain.manager.repository.ManagerRepository;
 import org.example.expert.domain.todo.entity.Todo;
@@ -15,58 +13,58 @@ import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ManagerService {
+    private final ManagerLogService managerLogService;
     private final ManagerRepository managerRepository;
     private final UserRepository userRepository;
     private final TodoRepository todoRepository;
-    private final ManagerLogRepository managerLogRepository;
 
     @Transactional
-    public ManagerSaveResponse saveManager(AuthUser authUser, long todoId, ManagerSaveRequest managerSaveRequest) {
+    public Object saveManager(Long userId, Long todoId, ManagerSaveRequest managerSaveRequest) {
+        managerLogService.saveLog(userId, todoId, "Manager save process started");
+
         // 일정을 만든 유저
-        User user = User.fromAuthUser(authUser);
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new InvalidRequestException("Todo not found"));
 
-        if (todo.getUser() == null || !ObjectUtils.nullSafeEquals(user.getId(), todo.getUser().getId())) {
-            throw new InvalidRequestException("담당자를 등록하려고 하는 유저가 유효하지 않거나, 일정을 만든 유저가 아닙니다.");
+        if (todo.getUser() == null || !ObjectUtils.nullSafeEquals(userId, todo.getUser().getId())) {
+            String errorMsg =  "담당자를 등록하려고 하는 유저가 유효하지 않거나, 일정을 만든 유저가 아닙니다.";
+            managerLogService.saveLog(userId, todoId, errorMsg);
+            throw new InvalidRequestException(errorMsg);
         }
 
         User managerUser = userRepository.findById(managerSaveRequest.getManagerUserId())
-                .orElseThrow(() -> new InvalidRequestException("등록하려고 하는 담당자 유저가 존재하지 않습니다."));
+                .orElseThrow(() -> {
+                    String errorMsg =  "등록하려고 하는 담당자 유저가 존재하지 않습니다.";
+                    managerLogService.saveLog(userId, todoId, errorMsg);
+                    return new InvalidRequestException(errorMsg);
+                });
 
-        if (ObjectUtils.nullSafeEquals(user.getId(), managerUser.getId())) {
-            throw new InvalidRequestException("일정 작성자는 본인을 담당자로 등록할 수 없습니다.");
+        if (ObjectUtils.nullSafeEquals(userId, managerUser.getId())) {
+            String errorMsg =  "일정 작성자는 본인을 담당자로 등록할 수 없습니다.";
+            managerLogService.saveLog(userId, todoId, errorMsg);
+            throw new InvalidRequestException(errorMsg);
         }
 
         Manager newManagerUser = new Manager(managerUser, todo);
         Manager savedManagerUser = managerRepository.save(newManagerUser);
-
+        managerLogService.saveLog(userId, todoId, "completed");
         return new ManagerSaveResponse(
                 savedManagerUser.getId(),
                 new UserResponse(managerUser.getId(), managerUser.getEmail())
         );
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveLog(Long userId, Long todoId, String result) {
-        ManagerLog log = ManagerLog.builder()
-                .userId(userId)
-                .todoId(todoId)
-                .result(result)
-                .build();
-        managerLogRepository.save(log);
     }
 
     public List<ManagerResponse> getManagers(long todoId) {
@@ -87,13 +85,11 @@ public class ManagerService {
     }
 
     @Transactional
-    public void deleteManager(AuthUser authUser, long todoId, long managerId) {
-        User user = User.fromAuthUser(authUser);
-
+    public void deleteManager(Long userId, long todoId, long managerId) {
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new InvalidRequestException("Todo not found"));
 
-        if (todo.getUser() == null || !ObjectUtils.nullSafeEquals(user.getId(), todo.getUser().getId())) {
+        if (todo.getUser() == null || !ObjectUtils.nullSafeEquals(userId, todo.getUser().getId())) {
             throw new InvalidRequestException("해당 일정을 만든 유저가 유효하지 않습니다.");
         }
 
