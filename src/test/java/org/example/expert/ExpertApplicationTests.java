@@ -28,17 +28,21 @@ class ExpertApplicationTests {
     @Test
     @Rollback(false)
     void sampleDataUser() {
-        List<User> users = new ArrayList<>();
-        for (int idx = 0; idx < 1000000; idx++) {
+        for (int idx = 812778; idx < 1000000; idx++) {
             String random = RandomStringUtils.randomAlphanumeric(10);
             String nickname = "[user " + idx + "]" + random;
-            users.add(User.builder()
+            userRepository.save(User.builder()
                     .email(nickname + "@gmail.com")
                     .password(passwordEncoder.encode("1234"))
                     .nickname(nickname)
                     .userRole(UserRole.USER)
                     .build());
         }
-        userRepository.saveAll(users);
+    }
+
+    @Test
+    void findUser() {
+        String nickname = "[user 999999]a9EEHZ7KDg";
+        User user = userRepository.findByNickName(nickname);
     }
 }
