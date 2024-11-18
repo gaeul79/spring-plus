@@ -43,6 +43,18 @@ class ExpertApplicationTests {
     @Test
     void findUser() {
         String nickname = "[user 999999]a9EEHZ7KDg";
-        User user = userRepository.findByNickName(nickname);
+        User user = userRepository.findByNickname(nickname);
+    }
+
+    @Test
+    void findUser2() {
+        String nickname = "[user 999999]a9EEHZ7KDg";
+        User user = userRepository.findByMinimumColumnNickName(nickname);
+    }
+
+    @Test
+    void findUser3() {
+        String nickname = "[user 999999]a9EEHZ7KDg";
+        User user = userRepository.findByIndexingNickName(nickname);
     }
 }
