@@ -26,16 +26,6 @@ public class S3Util {
     @Value("${spring.servlet.multipart.max-file-size}")
     private String fileMaxSize;
 
-    // saveProfileImage
-    // 업로드 할때는
-    // 없으면 그냥 반환
-    // S3에 없으면 추가
-    // S3에 있는데 입력한게 없으면 제거
-    // 있으면 기존걸 덮어써야 한다.
-
-    // deleteProfileImage
-    // 회원 탈퇴시 제거한다.
-
     // 파일 삭제
     public void deleteFile(String fileUrl) {
         String[] urlParts = fileUrl.split("/");
@@ -90,9 +80,24 @@ public class S3Util {
     // 파일 확장자 체크
     private String validateFileExtension(String originalFilename) {
         String fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
-        List<String> allowedExtensions = Arrays.asList("jpg", "png", "gif", "jpeg");
+        List<String> allowedExtensions = Arrays.asList("jpg", "png", "jpeg");
         if (!allowedExtensions.contains(fileExtension))
             throw new FileIOException("지원하지 않는 확장자");
         return fileExtension;
     }
+
+    // 요청에 중복되는 파일 여부 확인
+//    private boolean isDuplicate(String path) {
+//        String fileName = multipartFile.getOriginalFilename();
+//        Long fileSize = multipartFile.getSize();
+//
+//        if (uploadedFileNames.contains(fileName) && uploadedFileSizes.contains(fileSize)) {
+//            return true;
+//        }
+//
+//        uploadedFileNames.add(fileName);
+//        uploadedFileSizes.add(fileSize);
+//
+//        return false;
+//    }
 }

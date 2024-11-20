@@ -25,4 +25,10 @@ public class UserController {
             @RequestBody UserChangePasswordRequest userChangePasswordRequest) {
         userService.changePassword(userDetail.getId(), userChangePasswordRequest);
     }
+
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable long userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
+    }
 }
