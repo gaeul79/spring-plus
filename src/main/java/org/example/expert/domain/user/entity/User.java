@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.entity.Timestamped;
 import org.example.expert.domain.user.enums.UserRole;
 import org.example.expert.security.UserDetailsImpl;
@@ -33,20 +32,14 @@ public class User extends Timestamped {
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
 
+    @Column
+    private String imagePath;
+
     public User(String email, String password, String nickname, UserRole userRole) {
         this.email = email;
         this.nickname = nickname;
         this.password = password;
         this.userRole = userRole;
-    }
-
-    public static User fromAuthUser(AuthUser authUser) {
-        return new User(
-                authUser.getId(),
-                authUser.getEmail(),
-                authUser.getPassword(),
-                authUser.getNickname(),
-                authUser.getUserRole());
     }
 
     public static User fromAuthUser(UserDetailsImpl userDetail) {
@@ -55,7 +48,8 @@ public class User extends Timestamped {
                 userDetail.getEmail(),
                 userDetail.getPassword(),
                 userDetail.getNickname(),
-                userDetail.getUserRole());
+                userDetail.getUserRole(),
+                null);
     }
 
     public void changePassword(String password) {
@@ -64,5 +58,9 @@ public class User extends Timestamped {
 
     public void updateRole(UserRole userRole) {
         this.userRole = userRole;
+    }
+
+    public void updateImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 }
