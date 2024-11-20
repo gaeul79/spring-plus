@@ -14,7 +14,9 @@ import org.example.expert.security.UserDetailsImpl;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "users")
+//@Table(name = "users")
+@Table(name = "users", indexes =
+@Index(name = "idx_user_nickname", columnList = "nickname"))
 public class User extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

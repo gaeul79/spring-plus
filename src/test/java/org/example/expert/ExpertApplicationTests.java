@@ -1,7 +1,11 @@
 package org.example.expert;
 
+import org.example.expert.domain.user.dto.response.UserSimpleResponse;
+import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.repository.UserRepository;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,21 +38,15 @@ class ExpertApplicationTests {
 //        }
     }
 
-    @Test
+    @RepeatedTest(value = 50)
     void findUser() {
-//        String nickname = "[user 999999]a9EEHZ7KDg";
-//        User user = userRepository.findByNickname(nickname);
+        String nickname = "[user 999999]a9EEHZ7KDg";
+        User user = userRepository.findByNickname(nickname);
     }
 
-    @Test
+    @RepeatedTest(value = 50)
     void findUser2() {
-//        String nickname = "[user 999999]a9EEHZ7KDg";
-//        User user = userRepository.findByMinimumColumnNickName(nickname);
-    }
-
-    @Test
-    void findUser3() {
-//        String nickname = "[user 999999]a9EEHZ7KDg";
-//        User user = userRepository.findByIndexingNickName(nickname);
+        String nickname = "[user 999999]a9EEHZ7KDg";
+        UserSimpleResponse user = userRepository.findByMinimumColumnNickName(nickname);
     }
 }
