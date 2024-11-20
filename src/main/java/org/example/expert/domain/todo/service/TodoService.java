@@ -32,7 +32,7 @@ public class TodoService {
     public TodoSaveResponse saveTodo(UserDetailsImpl userDetail, TodoSaveRequest todoSaveRequest) {
         User user = User.fromAuthUser(userDetail);
         String weather = weatherClient.getTodayWeather();
-        Todo newTodo = new Todo(
+        Todo newTodo = Todo.Companion.create(
                 todoSaveRequest.getTitle(),
                 todoSaveRequest.getContents(),
                 weather,
