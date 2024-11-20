@@ -15,7 +15,6 @@ import java.time.format.DateTimeFormatter;
 
 @Component
 public class WeatherClient {
-
     private final RestTemplate restTemplate;
 
     public WeatherClient(RestTemplateBuilder builder) {
