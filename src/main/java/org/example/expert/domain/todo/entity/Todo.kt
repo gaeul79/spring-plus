@@ -26,7 +26,7 @@ class Todo(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    val user: User,
+    val user: User
     ) : Timestamped() {
     @OneToMany(mappedBy = "todo", cascade = [CascadeType.REMOVE])
     val comments: MutableList<Comment> = mutableListOf()
