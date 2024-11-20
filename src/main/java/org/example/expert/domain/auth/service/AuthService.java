@@ -42,7 +42,7 @@ public class AuthService {
         );
 
         User savedUser = userRepository.save(newUser);
-        String uploadPath = s3Util.saveFile(Long.toString(savedUser.getId()), profileImage);
+        String uploadPath = s3Util.upLoadProfileImage(Long.toString(savedUser.getId()), profileImage);
         savedUser.updateImagePath(uploadPath);
         String bearerToken = jwtUtil.createToken(savedUser.getId(), savedUser.getEmail(), savedUser.getNickname(), userRole);
         return new SignupResponse(bearerToken);

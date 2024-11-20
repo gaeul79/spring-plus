@@ -52,6 +52,10 @@ public class User extends Timestamped {
                 null);
     }
 
+    public void updateNickname(String newNickname) {
+        this.nickname = newNickname;
+    }
+
     public void changePassword(String password) {
         this.password = password;
     }

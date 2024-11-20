@@ -1,13 +1,14 @@
 package org.example.expert.domain.user.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.expert.domain.user.dto.request.UserChangePasswordRequest;
+import org.example.expert.domain.user.dto.request.UserChangeRequest;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.service.UserService;
 import org.example.expert.security.UserDetailsImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,10 +21,11 @@ public class UserController {
     }
 
     @PutMapping("/users")
-    public void changePassword(
+    public void updateUser(
             @AuthenticationPrincipal UserDetailsImpl userDetail,
-            @RequestBody UserChangePasswordRequest userChangePasswordRequest) {
-        userService.changePassword(userDetail.getId(), userChangePasswordRequest);
+            @RequestPart UserChangeRequest requestDto,
+            @RequestPart MultipartFile profileImage) {
+        userService.updateUser(userDetail.getId(), requestDto, profileImage);
     }
 
     @DeleteMapping("/users/{userId}")

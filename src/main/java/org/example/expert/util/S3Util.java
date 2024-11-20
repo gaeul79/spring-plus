@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.expert.domain.common.exception.FileIOException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
@@ -23,8 +24,42 @@ public class S3Util {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    @Value("${spring.servlet.multipart.max-file-size}")
-    private String fileMaxSize;
+    // 단일 파일 저장
+    private String saveFile(String fileName, MultipartFile file) {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(file.getSize());
+        metadata.setContentType(file.getContentType());
+
+        try {
+            amazonS3.putObject(bucket, fileName, file.getInputStream(), metadata);
+        } catch (AmazonS3Exception e) {
+            throw new FileIOException("S3 파일 업로드 중 오류 발생");
+        } catch (SdkClientException e) {
+            throw new FileIOException("SDK 오류로 인한 파일 업로드 실패");
+        } catch (Exception e) {
+            throw new FileIOException("파일 업로드 중 알 수 없는 오류 발생");
+        }
+
+        return amazonS3.getUrl(bucket, fileName).toString();
+    }
+
+    public String upLoadProfileImage(String userId, MultipartFile file) {
+        String fileName = createProfileFileName(userId, file);
+        return saveFile(fileName, file);
+    }
+
+    public String updateFile(String userId, String filePath, MultipartFile file) {
+        if(StringUtils.hasText(filePath)) {
+            return upLoadProfileImage(userId, file);
+        }
+
+        if(file == null) {
+            deleteFile(filePath);
+            return null;
+        }
+
+        return saveFile(filePath, file);
+    }
 
     // 파일 삭제
     public void deleteFile(String fileUrl) {
@@ -50,31 +85,11 @@ public class S3Util {
         }
     }
 
-    // 단일 파일 저장
-    public String saveFile(String userId, MultipartFile file) {
-        String randomFilename = createFileName(userId, file);
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(file.getSize());
-        metadata.setContentType(file.getContentType());
-
-        try {
-            amazonS3.putObject(bucket, randomFilename, file.getInputStream(), metadata);
-        } catch (AmazonS3Exception e) {
-            throw new FileIOException("S3 파일 업로드 중 오류 발생");
-        } catch (SdkClientException e) {
-            throw new FileIOException("SDK 오류로 인한 파일 업로드 실패");
-        } catch (Exception e) {
-            throw new FileIOException("파일 업로드 중 알 수 없는 오류 발생");
-        }
-
-        return amazonS3.getUrl(bucket, randomFilename).toString();
-    }
-
     // 랜덤파일명 생성 (파일명 중복 방지)
-    private String createFileName(String userId, MultipartFile multipartFile) {
+    private String createProfileFileName(String userId, MultipartFile multipartFile) {
         String fileName = multipartFile.getOriginalFilename();
         String fileExt = validateFileExtension(fileName);
-        return userId + "_" + fileName + "." + fileExt;
+        return "user_" + userId + "_profile." + fileExt;
     }
 
     // 파일 확장자 체크
@@ -85,19 +100,4 @@ public class S3Util {
             throw new FileIOException("지원하지 않는 확장자");
         return fileExtension;
     }
-
-    // 요청에 중복되는 파일 여부 확인
-//    private boolean isDuplicate(String path) {
-//        String fileName = multipartFile.getOriginalFilename();
-//        Long fileSize = multipartFile.getSize();
-//
-//        if (uploadedFileNames.contains(fileName) && uploadedFileSizes.contains(fileSize)) {
-//            return true;
-//        }
-//
-//        uploadedFileNames.add(fileName);
-//        uploadedFileSizes.add(fileSize);
-//
-//        return false;
-//    }
 }
