@@ -44,6 +44,9 @@ public class S3Util {
     }
 
     public String upLoadProfileImage(String userId, MultipartFile file) {
+        if(file == null)
+            return null;
+
         String fileName = createProfileFileName(userId, file);
         return saveFile(fileName, file);
     }
